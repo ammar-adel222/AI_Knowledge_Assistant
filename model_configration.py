@@ -1,6 +1,6 @@
 # config.py
 import os
-import this
+
 
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
@@ -14,8 +14,8 @@ class Config:
 
 
 
-    LLM_MODEL: str = "llama3-70b-8192"  # Main model for Q&A
-    SUMMARIZER_MODEL: str = "llama3-8b-8192"  # Lighter model for summarization
+    LLM_MODEL: str = "llama-3.3-70b-versatile"  # Main model for Q&A
+    SUMMARIZER_MODEL: str = "llama-3.1-8b-instant"  # Lighter model for summarization
 
     # Embeddings
     EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"

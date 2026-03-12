@@ -57,57 +57,47 @@ class YouTubeExtractor:
     def _get_transcript(self, video_id: str) -> str:
 
         print(f"   Fetching transcript...")
+        api = YouTubeTranscriptApi()
 
         try:
             # Attempt 1: english captions
-            transcript_list = YouTubeTranscriptApi.get_transcript(
-                video_id,
-                languages=["en"]
-
-            )
+            fetched = api.fetch(video_id, languages=["en"])
+            language = "en"
             print(f"   Language : English (manual)")
 
         except NoTranscriptFound:
 
             try:
                 # Attempt 2: auto-generated
-                transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
-
-                transcript_list = transcripts.find_generated_transcript(
-                    ["en"]
-                ).fetch()
-
+                  # ← create object first
+                transcript_list = api.list(video_id)
+                fetched = transcript_list.find_generated_transcript(["en"]).fetch()
+                language = "en"
                 print(f"   Language : English (auto-generated)")
 
             except NoTranscriptFound:
                 # no English at all so we grab whatever language exists
                 try:
                     # Attempt 3: Any language
-                    transcripts = YouTubeTranscriptApi.list_transcripts(video_id)
-
-                    # get first available transcript
-                    first_transcript = next(iter(transcripts))
-
-                    #                  iter() makes it iterable
-                    #                  next() gets the first one
-
-                    transcript_list = first_transcript.fetch()
-                    lang = first_transcript.language
-                    print(f"   Language : {lang} (non-english)")
+                    transcript_list = api.list(video_id)
+                    first = next(iter(transcript_list))
+                    fetched = first.fetch()
+                    language = first.language_code
+                    print(f"   Language : {language} (non-english)")
 
                 except Exception as e:
                     raise ValueError(f"No transcript available: {e}")
 
         # Stitch chunks into one text
-        full_text = " ".join(
-            chunk["text"]
-            for chunk in transcript_list
-        )
+        text = " ".join(snippet.text for snippet in fetched)
+
+
+        return text, language
         # transcript_list looks like:
         #   {"text": "hello",   "start": 0.0, "duration": 1.5},
         #   so we merge the text chunks together
 
-        return full_text
+
 
 
     def _translate_to_english(self, text: str) -> str:
@@ -219,16 +209,3 @@ class YouTubeExtractor:
         return [document]
 
 
-# ── Quick Test ─────────────────────────────────────────────
-if __name__ == "__main__":
-
-    extractor = YouTubeExtractor()
-
-    # Test with a non-english video
-    docs = extractor.extract("https://www.youtube.com/watch?v=B7wmo_NImgM&list=PLIUOU7oqGTLhlWpTz4NnuT3FekouIVlqc&index=36")
-
-    print("\n--- Document ---")
-    print("Language    :", docs[0].metadata["original_language"])
-    print("Translated  :", docs[0].metadata["translated"])
-    print("Words       :", len(docs[0].page_content.split()))
-    print("Preview     :", docs[0].page_content[:300])
