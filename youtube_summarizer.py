@@ -164,4 +164,3 @@ Final combined summary:"""
 
         return summarized_doc
 
-

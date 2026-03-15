@@ -220,4 +220,76 @@ ANSWER:"""
 
         return answer
 
+# add this function in chat.py
 
+import textwrap
+
+
+
+def format_answer(answer: str) -> None:
+
+
+
+    width = 70
+    #       ↑
+    #  max characters per line
+    #  fits nicely in most terminals
+
+    print(f"\n{'─' * width}")
+    print(f"🤖 Answer:")
+    print(f"{'─' * width}")
+
+    # ── Split into paragraphs first ───────────────
+    paragraphs = answer.strip().split("\n")
+    #                            ↑
+    #   LLaMA returns answers with \n for line breaks
+    #   split on each newline to get paragraphs
+
+    for paragraph in paragraphs:
+
+        paragraph = paragraph.strip()
+
+        if not paragraph:
+            # empty line between paragraphs
+            print()
+            continue
+
+        # ── Handle bullet points ──────────────────
+        if paragraph.startswith(("-", "•", "*", "+")):
+            # wrap bullet points with indentation
+            wrapped = textwrap.fill(
+                paragraph,
+                width                = width,
+                initial_indent       = "  ",
+                subsequent_indent    = "    "
+                #                       ↑
+                #   if bullet is too long and wraps
+                #   the continuation line is indented
+            )
+            print(wrapped)
+
+        # ── Handle numbered lists ─────────────────
+        elif paragraph[0].isdigit() and "." in paragraph[:3]:
+            # "1. something" or "2. something"
+            wrapped = textwrap.fill(
+                paragraph,
+                width             = width,
+                initial_indent    = "  ",
+                subsequent_indent = "     "
+            )
+            print(wrapped)
+
+        # ── Handle bold headers (markdown style) ──
+        elif paragraph.startswith("**") and paragraph.endswith("**"):
+            # **Header** → print as is, stands out
+            print(f"\n{paragraph}")
+
+        # ── Regular paragraph ─────────────────────
+        else:
+            wrapped = textwrap.fill(
+                paragraph,
+                width = width
+            )
+            print(wrapped)
+
+    print(f"{'─' * width}\n")

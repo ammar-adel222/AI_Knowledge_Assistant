@@ -35,7 +35,7 @@ class Config:
         return ChatGroq(
             api_key=cls.GROQ_API_KEY,
             model_name=cls.LLM_MODEL,
-            temperature=0.2,
+            temperature=0.7,
             max_tokens=1024,
         )
 
