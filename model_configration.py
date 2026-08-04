@@ -1,6 +1,17 @@
 # config.py
 import os
+import sys
 
+if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+if sys.stderr and hasattr(sys.stderr, "reconfigure"):
+    try:
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
 
 from dotenv import load_dotenv
 from langchain_groq import ChatGroq
@@ -31,19 +42,29 @@ class Config:
     YOUTUBE_MAX_SUMMARY_LENGTH: int = 5000
 
     @classmethod
+    def get_api_key(cls) -> str:
+        load_dotenv(override=True)
+        return os.getenv("GROQ_API_KEY", cls.GROQ_API_KEY)
+
+    @classmethod
     def get_qa_llm(cls) -> ChatGroq:
+        api_key = cls.get_api_key()
+        if not api_key:
+            raise ValueError("GROQ_API_KEY is missing! Please provide a valid Groq API key.")
         return ChatGroq(
-            api_key=cls.GROQ_API_KEY,
+            api_key=api_key,
             model_name=cls.LLM_MODEL,
             temperature=0.7,
             max_tokens=1024,
         )
 
-
     @classmethod
     def get_summarizer_llm(cls) -> ChatGroq:
+        api_key = cls.get_api_key()
+        if not api_key:
+            raise ValueError("GROQ_API_KEY is missing! Please provide a valid Groq API key.")
         return ChatGroq(
-            api_key=cls.GROQ_API_KEY,
+            api_key=api_key,
             model_name=cls.SUMMARIZER_MODEL,
             temperature=0.3,
             max_tokens=2048

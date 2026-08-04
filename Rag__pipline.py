@@ -36,6 +36,13 @@ class Chunker:
 
 
 
+import sys
+if sys.stdout and hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 class Embedder:
 
     def __init__(self):
@@ -45,7 +52,10 @@ class Embedder:
             model_kwargs  = {"device": "cpu"},
             encode_kwargs = {"normalize_embeddings": True}
         )
-        print(f"✅ Embedding model loaded!")
+        try:
+            print("Embedding model loaded!")
+        except Exception:
+            pass
 
     def get_embeddings(self) -> HuggingFaceEmbeddings:
         return self.embeddings

@@ -32,12 +32,6 @@ class DataLoader:
         try:
             docs = self.extractor.extract_pdf(path)
             self.all_documents.extend(docs)
-            #                   ↑
-            #    extend adds ALL docs to the list
-            #    (not as a nested list)
-            #
-            #    append → [[doc1, doc2], [doc3]]  ❌
-            #    extend → [doc1, doc2, doc3]       ✅
 
             print(f"   ✅ Added {len(docs)} pages from PDF")
 
